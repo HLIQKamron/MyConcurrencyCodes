@@ -2,33 +2,21 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
+	"sync"
 )
 
-func main() {
-	channel1 := make(chan string)
-	channel2 := make(chan string)
-
-	go func() {
-		rand.Seed(time.Now().UnixNano())
-		time.Sleep(time.Duration(rand.Intn(500)+500) * time.Millisecond)
-		channel1 <- "Player 1 Buzzed"
-	}()
-
-	go func() {
-		rand.Seed(time.Now().UnixNano())
-		time.Sleep(time.Duration(rand.Intn(500)+500) * time.Millisecond)
-		channel2 <- "Player 2 Buzzed"
-	}()
-	for i := 0; i < 2; i++ {
-		select {
-		case message1 := <-channel1:
-			fmt.Println(message1)
-		case message2 := <-channel2:
-			fmt.Println(message2)
-		}
+func printTable(n int, wg *sync.WaitGroup) {
+	for i := 1; i <= 12; i++ {
+		fmt.Printf("%d x %d = %d\n", i, n, n*i)
 	}
-	//fmt.Println(<-channel1)
-	//fmt.Println(<-channel2)
+	wg.Done()
+}
+
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(10)
+	for number := 2; number <= 12; number++ {
+		go printTable(number, &wg)
+	}
+	wg.Wait()
 }
