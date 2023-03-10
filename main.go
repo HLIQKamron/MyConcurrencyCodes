@@ -5,18 +5,27 @@ import (
 	"sync"
 )
 
-func printTable(n int, wg *sync.WaitGroup) {
-	for i := 1; i <= 12; i++ {
-		fmt.Printf("%d x %d = %d\n", i, n, n*i)
-	}
-	wg.Done()
-}
-
 func main() {
-	var wg sync.WaitGroup
-	wg.Add(10)
-	for number := 2; number <= 12; number++ {
-		go printTable(number, &wg)
-	}
-	wg.Wait()
+	balance := 100
+	var myWaitGroup sync.WaitGroup
+	var myMutext sync.Mutex
+
+	myWaitGroup.Add(2)
+	go deposit(&balance, 10, &myMutext, &myWaitGroup)
+	withdraw(&balance, 50, &myMutext, &myWaitGroup)
+
+	myWaitGroup.Wait()
+	fmt.Println(balance)
+}
+func deposit(balance *int, amount int, myMutex *sync.Mutex, myWaitGroup *sync.WaitGroup) {
+	myMutex.Lock()
+	*balance += amount
+	myMutex.Unlock()
+	myWaitGroup.Done()
+}
+func withdraw(balance *int, amount int, myMutex *sync.Mutex, myWaitGroup *sync.WaitGroup) {
+	myMutex.Lock()
+	*balance += amount
+	myMutex.Unlock()
+	myWaitGroup.Done()
 }
